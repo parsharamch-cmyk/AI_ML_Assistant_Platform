@@ -1,0 +1,23 @@
+<button onclick="startVoice()">🎙️ Talk to Health Assistant</button>
+<div id="response"></div>
+
+<script>
+function startVoice() {
+  const recognition = new webkitSpeechRecognition();
+  recognition.onresult = function(event) {
+    const transcript = event.results[0][0].transcript;
+    fetch("http://localhost:8000/health/query", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query: transcript })
+    })
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById("response").innerText = data.response;
+      const utterance = new SpeechSynthesisUtterance(data.response);
+      speechSynthesis.speak(utterance);
+    });
+  };
+  recognition.start();
+}
+</script>
